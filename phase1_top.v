@@ -231,7 +231,8 @@ MUX4 nopLWMUX(.in0(rf_15_or_waddr), .in1(4'b0000), .select(nop_lw_memwb), .out(r
 MUX16 pcORwdataMUX(.in0(rf_wdata), .in1(pc_added_memwb), .select(jal_memwb), .out(pcORwdata));
 // we send pc_added_exmem because wdata bypasses the MemWb pipeline
 // we send jal_exmem to bypass the MemWb Reg
-
+wire write_done_out, write_done_wire;
+assign write_done_wire = write_done_out;
 regfile RF(
   .clk(clk),
 	.rst(rst),
@@ -242,7 +243,8 @@ regfile RF(
 	//.wdata(rf_wdata), 
 	.wdata(pcORwdata),
  	.rdata1(rdata1),
-	.rdata2(rdata2)
+	.rdata2(rdata2),
+	.write_done(write_done_out)
 );
 
 
@@ -286,7 +288,8 @@ hdUnit hdu(
 .e_isLoad(lw_idex),
 .e_wreg(rf_waddr),
 .pc_stall(pc_stall_out),
-.ifid_stall(ifid_stall_out)
+.ifid_stall(ifid_stall_out),
+.write_done(write_done_wire)
 );
 
 //ID_EX instantiation
