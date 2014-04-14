@@ -181,8 +181,8 @@ memory DMem (.clk(clk), .rst(rst), .wen(dmem_wen_exmem_muxout), .addr(aluout_exm
 wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out;
 assign pc_stall_wire = pc_stall_out;
 assign ifid_stall_wire = ifid_stall_out;
-pc PC(.in(pc_mux_out), .out(pc_curr), .clk(clk), .rst(rst));
-addPC incPC(.in(pc_curr), .out(pc_added), .pc_stall(pc_stall_wire));
+pc PC(.in(pc_mux_out), .out(pc_curr), .clk(clk), .rst(rst), .stall(pc_stall_wire));
+addPC incPC(.in(pc_curr), .out(pc_added));
 
 //S9 is used to decide whether (PC = PC+1) or (PC = branch target+pC+1)
 //THIS IS THE FIRST PCMUX

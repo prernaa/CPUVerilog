@@ -19,9 +19,9 @@ output ifid_stall;
 reg pc_stall_temp;
 reg ifid_stall_temp;
 
-reg [1:0] stallCount;
+//reg [1:0] stallCount;
 
-always @ (*)
+/*always @ (*)
 begin
   stallCount = (e_isLoad===1'b1 && d_immonly!==1'b1 && (
 (d_addrselector===1'b1 && d_jr_or_exec!==1'b1 && (d_raddr1===e_wreg || d_raddr2===e_wreg)) ||//Check if instr in d is sw and whether it needs a stall
@@ -31,15 +31,23 @@ begin
   if(stallCount>3'b00) begin
     pc_stall_temp = 1'b1;
     ifid_stall_temp = 1'b1;
-    stallCount = stallCount-1'b1;
+  stallCount = stallCount-1'b1;
   end
   else begin
     pc_stall_temp = 1'b0;
     ifid_stall_temp = 1'b0;
   end  
-end
-assign pc_stall = pc_stall_temp;
-assign ifid_stall = ifid_stall_temp;
+end*/
+assign pc_stall = (e_isLoad===1'b1 && d_immonly!==1'b1 && e_wreg!==4'b000 && (
+(d_addrselector===1'b1 && d_jr_or_exec!==1'b1 && (d_raddr1===e_wreg || d_raddr2===e_wreg)) ||//Check if instr in d is sw and whether it needs a stall
+(d_addrselector===1'b1 && d_jr_or_exec===1'b1 && (d_raddr2===e_wreg)) || // JR or exec
+(d_addrselector!==1'b1 && (d_raddr1===e_wreg || d_raddr2===e_wreg))
+))? 1'b1 : pc_stall;
+assign ifid_stall = (e_isLoad===1'b1 && d_immonly!==1'b1 && e_wreg!==4'b000 && (
+(d_addrselector===1'b1 && d_jr_or_exec!==1'b1 && (d_raddr1===e_wreg || d_raddr2===e_wreg)) ||//Check if instr in d is sw and whether it needs a stall
+(d_addrselector===1'b1 && d_jr_or_exec===1'b1 && (d_raddr2===e_wreg)) || // JR or exec
+(d_addrselector!==1'b1 && (d_raddr1===e_wreg || d_raddr2===e_wreg))
+)) ? 1'b1 : ifid_stall;
 
 /// NOP also has to sent through the whole pipeline 3 times
 
