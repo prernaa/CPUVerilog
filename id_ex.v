@@ -9,7 +9,8 @@ s5_idex, s6_idex , s7_idex, pc_added_IDEX, cond_IDEX,
 jal, jal_idex,
 imm_12_to_16_idif, imm_12_to_16_idex,
 jr,jr_idex,
-exec, exec_idex
+exec, exec_idex,
+lw, lw_idex
 );
   
   input clk;
@@ -34,6 +35,7 @@ exec, exec_idex
   input [15:0] imm_12_to_16_idif;
   input jr;
   input exec;
+  input lw;
   //input [2:0] flagprev_idif;
   
   
@@ -59,6 +61,7 @@ exec, exec_idex
   output [15:0] imm_12_to_16_idex;
   output jr_idex;
   output exec_idex;
+  output lw_idex;
   
   reg [15:0] extended_idex_temp;
   reg [7:0] imm_7_0_idex_temp;
@@ -69,6 +72,7 @@ exec, exec_idex
   reg jr_temp;
   reg [15:0] imm_12_to_16_temp;
   reg exec_temp;
+  reg lw_temp;
   //reg [2:0] flagprev_temp;
     
     
@@ -97,6 +101,7 @@ exec, exec_idex
         inst_curr_IDEX_temp <= inst_curr_IDIF;
         imm_12_to_16_temp <= imm_12_to_16_idif;
         exec_temp <= exec;
+        lw_temp <= lw;
         end
     assign dmem_wen_idex = dmem_wen_idex_temp;
     assign rf_wen_idex = rf_wen_idex_temp;
@@ -120,6 +125,7 @@ exec, exec_idex
     assign jr_idex = jr_temp;
     assign imm_12_to_16_idex = imm_12_to_16_temp;
     assign exec_idex = exec_temp;
+    assign lw_idex = lw_temp;
 
 
 endmodule

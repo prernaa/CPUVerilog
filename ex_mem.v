@@ -5,7 +5,7 @@ rf_wen_exmem, branch2_exmem, mem2reg_exmem, aluout_exmem, flag_exmem,
 rdata2_exmem, rf_waddr_exmem, extended_exmem, s7_exmem, branch_target_final_muxout, branch_target_exmem,
 nop_lw_idex,nop_sw_idex, nop_lw_exmem, nop_sw_exmem,
 pc_added_idex, pc_added_exmem,
-jal_idex, jal_exmem,
+jal_idex, jal_exmem
 );
   
   input clk;

@@ -106,7 +106,7 @@ wire JAL_control_mux_final;
 wire JAL_write_reg;
 
 wire [15:0] pc_normal_added_out;
-
+wire [15:0] lhb_llb_regval;
 /// assigning opcode
 assign opcode = inst_curr_IDIF[15:12];
 
@@ -178,9 +178,11 @@ memory DMem (.clk(clk), .rst(rst), .wen(dmem_wen_exmem_muxout), .addr(aluout_exm
 .data_in(rdata2_exmem), .fileid(4'd10), .data_out(mem_data_out));
 
 /// IF Stage instantiation
-
+wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out;
+assign pc_stall_wire = pc_stall_out;
+assign ifid_stall_wire = ifid_stall_out;
 pc PC(.in(pc_mux_out), .out(pc_curr), .clk(clk), .rst(rst));
-addPC incPC(.in(pc_curr), .out(pc_added));
+addPC incPC(.in(pc_curr), .out(pc_added), .pc_stall(pc_stall_wire));
 
 //S9 is used to decide whether (PC = PC+1) or (PC = branch target+pC+1)
 //THIS IS THE FIRST PCMUX
@@ -209,7 +211,7 @@ sign_ext_12_16 signext12_16_1(.imm_12(inst_curr_IDIF[11:0]),.imm_16(imm_12_to_16
 ///IF_ID instantiation
 
 if_id IF_ID (.clk(clk), .inst_curr(inst_curr), .pc_added(pc_added),  
-.inst_curr_IFID(inst_curr_IDIF),.pc_added_IDIF(pc_added_IDIF));
+.inst_curr_IFID(inst_curr_IDIF),.pc_added_IDIF(pc_added_IDIF), .ifid_stall(ifid_stall_wire));
 
 //mux for deciding which input to go to raddr2
 MUX4 S4 (.in0(inst_curr_IDIF[3:0]), .in1(inst_curr_IDIF[11:8])
@@ -246,7 +248,8 @@ regfile RF(
 
 wire [15:0] lhb_llb_imm_16; 
 ///ID Instantiation
-
+wire lw_out, lw_wire, lw_idex;
+assign lw_wire = lw_out;
 
 ///Control instantiation
 control Ctrl(
@@ -266,13 +269,25 @@ control Ctrl(
     .s7(s7),
     .jal(jal),
     .jr(jr),
-    .exec(exec)
+    .exec(exec),
+    .lw(lw_out)
 );
 
 wire s5_idex, s6_idex, s7_idex;
 
 wire lhb_llb_con_idex;
 
+hdUnit hdu(
+.d_raddr1(inst_curr_IDIF[7:4]),
+.d_raddr2(inst_raddr2),
+.d_addrselector(lhb_llb_regcon),
+.d_jr_or_exec((jr||exec)?1'b1:1'b0),
+.d_immonly(opcode===4'b1010 || opcode===4'b1100 || opcode===4'b1101),
+.e_isLoad(lw_idex),
+.e_wreg(rf_waddr),
+.pc_stall(pc_stall_out),
+.ifid_stall(ifid_stall_out)
+);
 
 //ID_EX instantiation
 wire branch_idex;
@@ -297,11 +312,12 @@ id_ex ID_EX(.clk(clk), .pc_added_IDIF(pc_added_IDIF), .cond_IDIF(cond_IDIF),
 .jal(jal), .jal_idex(jal_idex),
 .imm_12_to_16_idif(imm_12_to_16_idif), .imm_12_to_16_idex(imm_12_to_16_idex),
 .jr(jr), .jr_idex(jr_idex),
-.exec(exec), .exec_idex(exec_idex)
+.exec(exec), .exec_idex(exec_idex),
+.lw(lw_wire), .lw_idex(lw_idex)
 );
 
 ///EXE instantiation
-wire [15:0] lhb_llb_regval;
+
 wire [15:0] alu_second_input_final;
 
 //mux for deciding between rdata2 and immediate value as ALU's second input
@@ -334,7 +350,8 @@ assign branch_target_final = (jr_idex===1'b1 || exec_idex === 1'b1)? rdata2_idex
 MUX16 branch_target_final_or_exec (.in0(branch_target_final), .in1(execPCadded),.select(putPCback),.out(branch_target_final_muxout));
 
 
-control_exe control_EXE(.clk(clk),
+control_exe control_EXE(
+  .clk(clk),
   .rst(rst),
   .branch_target(branch_target_final), 
   .pc_added(pc_added_IDEX), 

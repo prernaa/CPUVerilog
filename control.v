@@ -20,7 +20,8 @@ module control(
     s7,
     jal,
     jr,
-    exec
+    exec, 
+    lw,
 	//jump_control
   );
  
@@ -43,6 +44,7 @@ module control(
  output reg jal;
  output reg jr;
  output reg exec;
+ output reg lw; 
  //output reg control_lhb_llb;
  //output reg jump_control;
 
@@ -66,6 +68,7 @@ begin
     jal = 0; 
     jr = 0;
     exec = 0;
+    lw=0;
   end
   if ( (opcode==`SLL) || (opcode==`SRL) || (opcode==`SRA) || (opcode==`RL) )
   begin
@@ -83,6 +86,7 @@ begin
     jal=0;
     jr = 0;
     exec = 0;
+    lw=0;
   end
   if (opcode==`LW)
   begin
@@ -100,6 +104,7 @@ begin
     jal=0;
     jr = 0;
     exec =0;
+    lw=1;
   end
   if (opcode==`SW)
   begin
@@ -116,6 +121,7 @@ begin
     jal=0;
     jr = 0;
     exec = 0;
+    lw=0;
   end
   if((opcode == `LHB)) 
   begin
@@ -132,6 +138,7 @@ begin
     jal=0;
     jr = 0;
     exec = 0;
+    lw=0;
   end
   if(opcode == `LLB)
   begin
@@ -143,6 +150,7 @@ begin
     jal=0;
     jr = 0;
     exec = 0;
+    lw=0;
   end 
   if(opcode == `JAL)
   begin
@@ -160,6 +168,7 @@ begin
     s7 = 0;
     jr = 0;
     exec = 0;
+    lw=0;
   end
   
   if(opcode == `JR)
@@ -174,7 +183,7 @@ begin
     s7 = 0;
     jr = 1;
     exec = 0;
-    
+    lw=0;
   end
   if(opcode == `EXEC)
   begin
@@ -188,6 +197,7 @@ begin
     s7 = 0;
     jr = 0;
     exec = 1;
+    lw=0;
   end
   /*if(opcode == `JAL)
   begin
