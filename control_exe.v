@@ -221,9 +221,9 @@ always @ (pc_added)
         putBack_temp = putPCback_temp2;  
         end // always end
     assign branch2_idex = branch2_temp2;
-    assign nop_alu = nop_alu_temp;
-    assign nop_lw = nop_lw_temp;
-    assign nop_sw = nop_sw_temp;
+    assign nop_alu = (putPCback===1'b0)? nop_alu_temp : 1'b0;
+    assign nop_lw = (putPCback===1'b0)? nop_lw_temp : 1'b0;
+    assign nop_sw = (putPCback===1'b0)? nop_sw_temp : 1'b0;
     assign execPCadded = execPCadded_temp;
     assign putPCback = putBack_temp;
 endmodule
