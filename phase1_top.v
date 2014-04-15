@@ -178,9 +178,10 @@ memory DMem (.clk(clk), .rst(rst), .wen(dmem_wen_exmem_muxout), .addr(aluout_exm
 .data_in(rdata2_exmem), .fileid(4'd10), .data_out(mem_data_out));
 
 /// IF Stage instantiation
-wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out;
+wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out, idex_stall_wire, idex_stall_out;
 assign pc_stall_wire = pc_stall_out;
 assign ifid_stall_wire = ifid_stall_out;
+assign idex_stall_wire = idex_stall_out;
 pc PC(.in(pc_mux_out), .out(pc_curr), .clk(clk), .rst(rst), .stall(pc_stall_wire));
 addPC incPC(.in(pc_curr), .out(pc_added));
 
@@ -236,7 +237,7 @@ reg write_done_temp;
 reg [1:0] stallCount_reg;
 wire [1:0] stallCount;
 assign write_done_wire = write_done_out;
-assign stallCount = (pc_stall_out===1'b1)? 2'b11: 2'b00;
+assign stallCount = (pc_stall_out===1'b1)? 2'b01: 2'b00;
 always @ (posedge clk) begin
   if(!(stallCount_reg>2'b00) || stallCount_reg===2'bxx) begin 
     stallCount_reg = stallCount; 
@@ -304,6 +305,7 @@ hdUnit hdu(
 .e_wreg(rf_waddr),
 .pc_stall(pc_stall_out),
 .ifid_stall(ifid_stall_out),
+.idex_stall(idex_stall_out),
 .write_done(write_done_wire)
 );
 
@@ -331,7 +333,8 @@ id_ex ID_EX(.clk(clk), .pc_added_IDIF(pc_added_IDIF), .cond_IDIF(cond_IDIF),
 .imm_12_to_16_idif(imm_12_to_16_idif), .imm_12_to_16_idex(imm_12_to_16_idex),
 .jr(jr), .jr_idex(jr_idex),
 .exec(exec), .exec_idex(exec_idex),
-.lw(lw_wire), .lw_idex(lw_idex)
+.lw(lw_wire), .lw_idex(lw_idex),
+.stall(idex_stall_wire)
 );
 
 ///EXE instantiation
