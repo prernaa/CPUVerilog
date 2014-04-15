@@ -14,8 +14,7 @@ module regfile (
 	waddr, 
 	wdata, 
   	rdata1,
-	rdata2,
-	write_done
+	rdata2
 	);
 	
         parameter DSIZE=16;
@@ -36,7 +35,6 @@ module regfile (
 	input [DSIZE-1:0] wdata;
  	output [DSIZE-1:0] rdata1;
 	output [DSIZE-1:0] rdata2;
-	output reg write_done;
 
 	reg [DSIZE-1:0] regdata [0:NREG-1];
 	reg wen_temp;
@@ -45,7 +43,6 @@ module regfile (
 
 	always@(posedge clk)
 		begin
-		  write_done = 1'b0;
 			if(rst)
 				begin
 				  //wen_temp <= 0;
@@ -70,7 +67,7 @@ module regfile (
 			  regdata[15] = jal_pc_val;*/
 			else
 				regdata[waddr] <= ((wen == 1) && (waddr != 0)) ? wdata : regdata[waddr];
-				write_done = 1'b1;
+				
 		end
 	
 	//assign rdata1 = jr_rf? regdata[jr_raddr]:(((wen) && (waddr == raddr1) && (waddr != 0)) ? wdata : regdata[raddr1]);

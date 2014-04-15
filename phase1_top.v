@@ -232,7 +232,23 @@ MUX16 pcORwdataMUX(.in0(rf_wdata), .in1(pc_added_memwb), .select(jal_memwb), .ou
 // we send pc_added_exmem because wdata bypasses the MemWb pipeline
 // we send jal_exmem to bypass the MemWb Reg
 wire write_done_out, write_done_wire;
+reg write_done_temp;
+reg [1:0] stallCount_reg;
+wire [1:0] stallCount;
 assign write_done_wire = write_done_out;
+assign stallCount = (pc_stall_out===1'b1)? 2'b11: 2'b00;
+always @ (posedge clk) begin
+  if(!(stallCount_reg>2'b00) || stallCount_reg===2'bxx) begin 
+    stallCount_reg = stallCount; 
+    write_done_temp=0;
+  end
+  else begin
+    stallCount_reg = stallCount_reg-1;
+    if(stallCount_reg===1'b0) begin write_done_temp=1; end
+  end
+end
+assign write_done_out  = write_done_temp;
+
 regfile RF(
   .clk(clk),
 	.rst(rst),
@@ -243,8 +259,7 @@ regfile RF(
 	//.wdata(rf_wdata), 
 	.wdata(pcORwdata),
  	.rdata1(rdata1),
-	.rdata2(rdata2),
-	.write_done(write_done_out)
+	.rdata2(rdata2)
 );
 
 

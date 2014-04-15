@@ -10,7 +10,8 @@ jal, jal_idex,
 imm_12_to_16_idif, imm_12_to_16_idex,
 jr,jr_idex,
 exec, exec_idex,
-lw, lw_idex
+lw, lw_idex,
+idex_stall
 );
   
   input clk;
@@ -37,6 +38,8 @@ lw, lw_idex
   input exec;
   input lw;
   //input [2:0] flagprev_idif;
+  
+  input idex_stall;
   
   
   output dmem_wen_idex; reg dmem_wen_idex_temp;
@@ -79,6 +82,7 @@ lw, lw_idex
     always @ (posedge clk)
         begin
         //get instruction 
+        //if(idex_stall!==1'b1) begin
         dmem_wen_idex_temp <= dmem_wen;
         rf_wen_idex_temp <= rf_wen;
         alu_op_idex_temp <= alu_op;
@@ -102,6 +106,7 @@ lw, lw_idex
         imm_12_to_16_temp <= imm_12_to_16_idif;
         exec_temp <= exec;
         lw_temp <= lw;
+        //end
         end
     assign dmem_wen_idex = dmem_wen_idex_temp;
     assign rf_wen_idex = rf_wen_idex_temp;
