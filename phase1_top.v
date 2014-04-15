@@ -178,12 +178,13 @@ memory DMem (.clk(clk), .rst(rst), .wen(dmem_wen_exmem_muxout), .addr(aluout_exm
 .data_in(rdata2_exmem), .fileid(4'd10), .data_out(mem_data_out));
 
 /// IF Stage instantiation
-wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out, idex_stall_wire, idex_stall_out;
+wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out, idex_stall_wire, idex_stall_out, inst_stall_wire, inst_stall_out;
 assign pc_stall_wire = pc_stall_out;
 assign ifid_stall_wire = ifid_stall_out;
 assign idex_stall_wire = idex_stall_out;
+assign inst_stall_wire = inst_stall_out;
 pc PC(.in(pc_mux_out), .out(pc_curr), .clk(clk), .rst(rst), .stall(pc_stall_wire));
-addPC incPC(.in(pc_curr), .out(pc_added));
+addPC incPC(.in(pc_curr), .out(pc_added), .stall(inst_stall_wire));
 
 //S9 is used to decide whether (PC = PC+1) or (PC = branch target+pC+1)
 //THIS IS THE FIRST PCMUX
@@ -307,6 +308,7 @@ hdUnit hdu(
 .pc_stall(pc_stall_out),
 .ifid_stall(ifid_stall_out),
 .idex_stall(idex_stall_out),
+.inst_stall(inst_stall_out),
 .write_done(write_done_wire)
 );
 
