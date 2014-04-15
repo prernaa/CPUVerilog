@@ -345,9 +345,9 @@ id_ex ID_EX(.clk(clk), .pc_added_IDIF(pc_added_IDIF), .cond_IDIF(cond_IDIF),
 wire [15:0] alu_second_input_final;
 
 wire [15:0] rdata1_idex_final;
-wire [15:0] rdata2_idex_final;
+wire [15:0] rdata2_idex_final,rdata2_idex_sw_val;
 
-wire [1:0] forwardA,forwardB;
+wire [1:0] forwardA,forwardB, rdata2_sw_fcontrol;
 
 
 //MUX for selecting rdata1 / memwb_data / exmem_data (assuming this is the value inside EX)
@@ -358,17 +358,24 @@ MUX16_3_input forward_a_alu( .in0(rdata1_idex), .in1(pcORwdata), .in2(aluout_exm
 MUX16_3_input forward_b_alu(.in0(rdata2_idex), .in1(pcORwdata), .in2(aluout_exmem),
 .select(forwardB), .out(rdata2_idex_final));
 
+//MUX for selecting rdata2/forwarded value for store instruction (special case)
+MUX16_3_input forward_sw_rdata2(.in0(rdata2_idex),.in1(pcORwdata),.in2(aluout_exmem),
+.select(rdata2_sw_fcontrol), .out(rdata2_idex_sw_val));
+
 //FORWARDING UNIT
 forwarding_unit f_unit1 (
   .rf_waddr_exmem(rf_waddr_exmem),
   .rf_waddr_memwb(rf_waddr_memwb),
   .inst_curr_IDEX_7_4_rs(inst_curr_IDEX[7:4]),
   .inst_curr_IDEX_3_0_rt(inst_curr_IDEX[3:0]),
+  .inst_curr_IDEX_11_8_rd(inst_curr_IDEX[11:8]),
   .rf_wen_exmem(rf_wen_exmem),
   .rf_wen_memwb(rf_wen_memwb),
   .mem2reg_memwb(mem2reg_memwb),
+  .dmem_wen_idex(dmem_wen_idex),
   .forwardA(forwardA),
-  .forwardB(forwardB)
+  .forwardB(forwardB),
+  .rdata2_sw_fcontrol(rdata2_sw_fcontrol)
   );
 
 
@@ -455,11 +462,12 @@ MUX16 S5(.in0(rdata2_idex_final),.in1(changed8_1),.select(s5_idex),.out(alu_seco
 wire [15:0] imm_16_0_exmem;
 
 
+//rdata2_idex_sw_val is the muxed val needed for forwarding store(sw) instruction
 ex_mem EX_MEM (.clk(clk),.s7_idex(s7_idex), .dmem_wen_idex(dmem_wen_idex), 
 .rf_wen_idex(rf_wen_idex), 
 .branch2_idex(branch2_idex), .mem2reg_idex(mem2reg_idex), .aluout(aluout), 
 .flag(flag), .extended_16_idex(imm_16_0_idex), 
-.rdata2_idex(rdata2_idex_final), .rf_waddr(rf_waddr), .dmem_wen_exmem(dmem_wen_exmem), 
+.rdata2_idex(rdata2_idex_sw_val), .rf_waddr(rf_waddr), .dmem_wen_exmem(dmem_wen_exmem), 
 .rf_wen_exmem(rf_wen_exmem), .branch2_exmem(branch2_exmem), .mem2reg_exmem(mem2reg_exmem), 
 .aluout_exmem(aluout_exmem), .flag_exmem(flag_exmem), 
 .rdata2_exmem(rdata2_exmem), .rf_waddr_exmem(rf_waddr_exmem),
@@ -467,7 +475,7 @@ ex_mem EX_MEM (.clk(clk),.s7_idex(s7_idex), .dmem_wen_idex(dmem_wen_idex),
 ,.s7_exmem(s7_exmem),
 .branch_target_final_muxout(branch_target_final_muxout), .branch_target_exmem(branch_target_exmem),
 .nop_lw_idex(nop_lw_idex),.nop_lw_exmem(nop_lw_exmem),
-.nop_sw_idex(nop_lw_idex),.nop_sw_exmem(nop_lw_exmem),
+.nop_sw_idex(nop_sw_idex),.nop_sw_exmem(nop_sw_exmem),
 .pc_added_idex(pc_added_IDEX), .pc_added_exmem(pc_added_exmem),
 .jal_idex(jal_idex), .jal_exmem(jal_exmem)
 );

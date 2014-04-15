@@ -5,22 +5,28 @@ module forwarding_unit
   rf_waddr_memwb,
   inst_curr_IDEX_7_4_rs,
   inst_curr_IDEX_3_0_rt,
+  inst_curr_IDEX_11_8_rd,
   rf_wen_exmem,
   rf_wen_memwb,
   mem2reg_memwb,
+  dmem_wen_idex,
   forwardA,
-  forwardB
+  forwardB,
+  rdata2_sw_fcontrol,
   );
   
   input [3:0] rf_waddr_exmem;
   input [3:0] rf_waddr_memwb;
   input [3:0] inst_curr_IDEX_7_4_rs;
   input [3:0] inst_curr_IDEX_3_0_rt;
+  input [3:0] inst_curr_IDEX_11_8_rd;
   input rf_wen_exmem;
   input rf_wen_memwb;
   input mem2reg_memwb;
+  input dmem_wen_idex;
   output [1:0] forwardA;
   output [1:0] forwardB;
+  output [1:0] rdata2_sw_fcontrol;
   
   
   //just doing it for basic arithmetic data hazards at the moment
@@ -37,7 +43,13 @@ module forwarding_unit
               && (!(rf_waddr_exmem === inst_curr_IDEX_3_0_rt)) 
               && (rf_waddr_memwb === inst_curr_IDEX_3_0_rt)
               && (mem2reg_memwb === 1'b1)) ? 2'b01 : 2'b00);
-              
+  
+  //data forwarding for store instruction
+  assign rdata2_sw_fcontrol = ((dmem_wen_idex === 1'b0) && (!(rf_waddr_exmem === 4'b0000))
+                               && (rf_waddr_exmem === inst_curr_IDEX_11_8_rd)) ? 2'b10:
+                               (((dmem_wen_idex === 1'b0) && (!(rf_waddr_memwb === 4'b0000))
+                               && (rf_waddr_memwb === inst_curr_IDEX_11_8_rd)) ? 2'b01 : 2'b00);
+                                          
 endmodule                 
     
     
