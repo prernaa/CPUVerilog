@@ -342,6 +342,34 @@ id_ex ID_EX(.clk(clk), .pc_added_IDIF(pc_added_IDIF), .cond_IDIF(cond_IDIF),
 
 wire [15:0] alu_second_input_final;
 
+wire [15:0] rdata1_idex_final;
+wire [15:0] rdata2_idex_final;
+
+wire [1:0] forwardA,forwardB;
+
+
+//MUX for selecting rdata1 / memwb_data / exmem_data (assuming this is the value inside EX)
+MUX16_3_input forward_a_alu( .in0(rdata1_idex), .in1(pcORwdata), .in2(aluout_exmem), 
+.select(forwardA), .out(rdata1_idex_final));
+
+//MUX for selecting rdata2 / memwb_data / exmem_data (assuming this is the value inside EX)
+MUX16_3_input forward_b_alu(.in0(rdata2_idex), .in1(pcORwdata), .in2(aluout_exmem),
+.select(forwardB), .out(rdata2_idex_final));
+
+//FORWARDING UNIT
+forwarding_unit f_unit1 (
+  .rf_waddr_exmem(rf_waddr_exmem),
+  .rf_waddr_memwb(rf_waddr_memwb),
+  .inst_curr_IDEX_7_4_rs(inst_curr_IDEX[7:4]),
+  .inst_curr_IDEX_3_0_rt(inst_curr_IDEX[3:0]),
+  .rf_wen_exmem(rf_wen_exmem),
+  .rf_wen_memwb(rf_wen_memwb),
+  .mem2reg_memwb(mem2reg_memwb),
+  .forwardA(forwardA),
+  .forwardB(forwardB)
+  );
+
+
 //mux for deciding between rdata2 and immediate value as ALU's second input
 MUX16 S1( .in0(alu_second_input), .in1(extended_idex), .select(alusrc_idex), .out(alu_second_input_final));
 
@@ -413,9 +441,9 @@ ShiftLeftThenAdd1s shiftleftthenadd1s(.In(imm_7_0_idex), .Out_L8_1(shifted81));
 changefirst8bits_1 changefirst8bits_1(.In(rdata2_idex),.Out_F8_1(changed8_1));
 
 //for ALU first input
-MUX16 S6(.in0(shifted81), .in1(rdata1_idex), .select(s6_idex), .out(alu_first_input));
+MUX16 S6(.in0(shifted81), .in1(rdata1_idex_final), .select(s6_idex), .out(alu_first_input));
 //for ALU second input
-MUX16 S5(.in0(rdata2_idex),.in1(changed8_1),.select(s5_idex),.out(alu_second_input));
+MUX16 S5(.in0(rdata2_idex_final),.in1(changed8_1),.select(s5_idex),.out(alu_second_input));
 
 //mux to select whether to jump to target address or continue with next program counter
 //MUX16 select_jump(.in0(pc_curr), .in1(imm_16_0_idex), .select(jump_control), .out(pc_added));
@@ -429,7 +457,7 @@ ex_mem EX_MEM (.clk(clk),.s7_idex(s7_idex), .dmem_wen_idex(dmem_wen_idex),
 .rf_wen_idex(rf_wen_idex), 
 .branch2_idex(branch2_idex), .mem2reg_idex(mem2reg_idex), .aluout(aluout), 
 .flag(flag), .extended_16_idex(imm_16_0_idex), 
-.rdata2_idex(rdata2_idex), .rf_waddr(rf_waddr), .dmem_wen_exmem(dmem_wen_exmem), 
+.rdata2_idex(rdata2_idex_final), .rf_waddr(rf_waddr), .dmem_wen_exmem(dmem_wen_exmem), 
 .rf_wen_exmem(rf_wen_exmem), .branch2_exmem(branch2_exmem), .mem2reg_exmem(mem2reg_exmem), 
 .aluout_exmem(aluout_exmem), .flag_exmem(flag_exmem), 
 .rdata2_exmem(rdata2_exmem), .rf_waddr_exmem(rf_waddr_exmem),
