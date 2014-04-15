@@ -372,6 +372,7 @@ forwarding_unit f_unit1 (
   .rf_wen_exmem(rf_wen_exmem),
   .rf_wen_memwb(rf_wen_memwb),
   .mem2reg_memwb(mem2reg_memwb),
+  .mem2reg_exmem(mem2reg_exmem),
   .dmem_wen_idex(dmem_wen_idex),
   .forwardA(forwardA),
   .forwardB(forwardB),
