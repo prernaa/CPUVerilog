@@ -237,7 +237,7 @@ reg write_done_temp;
 reg [1:0] stallCount_reg;
 wire [1:0] stallCount;
 assign write_done_wire = write_done_out;
-assign stallCount = (pc_stall_out===1'b1)? 2'b01: 2'b00;
+assign stallCount = (pc_stall_out===1'b1)? 2'b10: 2'b00;
 always @ (posedge clk) begin
   if(!(stallCount_reg>2'b00) || stallCount_reg===2'bxx) begin 
     stallCount_reg = stallCount; 
@@ -301,6 +301,7 @@ hdUnit hdu(
 .d_addrselector(lhb_llb_regcon),
 .d_jr_or_exec((jr||exec)?1'b1:1'b0),
 .d_immonly(opcode===4'b1010 || opcode===4'b1100 || opcode===4'b1101),
+.d_opcode(opcode),
 .e_isLoad(lw_idex),
 .e_wreg(rf_waddr),
 .pc_stall(pc_stall_out),
