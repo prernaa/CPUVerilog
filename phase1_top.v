@@ -168,14 +168,14 @@ wire branch2_exmem;
 assign pc_in_imem = (branch2_exmem === 1'b1) ? branch_target_exmem : pc_added;
 
 memory IMem (.clk(clk), .rst(rst), .wen(1'b1), .addr(pc_in_imem), 
-.data_in(mem_data_in), .fileid(4'd2), .data_out(inst_curr));
+.data_in(mem_data_in), .fileid(4'd1), .data_out(inst_curr));
 
 // NOP store statement
 wire dmem_wen_exmem_muxout;
 // DONT USE MUX COZ 1 BIT - MUX4 dmemNOPMux(.in0(dmem_wen_exmem), .in1(), .select(nop_sw_exmem), .out(dmem_wen_exmem_muxout));
 assign dmem_wen_exmem_muxout = (nop_sw_exmem===1'b1)?1'b1:dmem_wen_exmem;
 memory DMem (.clk(clk), .rst(rst), .wen(dmem_wen_exmem_muxout), .addr(aluout_exmem), 
-.data_in(rdata2_exmem), .fileid(4'd10), .data_out(mem_data_out));
+.data_in(rdata2_exmem), .fileid(4'd9), .data_out(mem_data_out));
 
 /// IF Stage instantiation
 wire pc_stall_wire, ifid_stall_wire, pc_stall_out, ifid_stall_out, idex_stall_wire, idex_stall_out, inst_stall_wire, inst_stall_out;
