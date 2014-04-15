@@ -122,6 +122,7 @@ begin
     jr = 0;
     exec = 0;
     lw=0;
+    mem2reg=0;
   end
   if((opcode == `LHB)) 
   begin
@@ -131,6 +132,7 @@ begin
     regdest = 1;
     branch = 0;
     lhb_llb_con1 = 1;
+    mem2reg=0;
     alusrc = 0;
     s5 = 1;
     s6 = 0;
@@ -145,6 +147,7 @@ begin
     dmem_wen = 1;
     rf_wen = 1;
     regdest = 1;
+    mem2reg=0;
     s7 = 1;
     branch = 0;
     jal=0;
@@ -177,6 +180,7 @@ begin
     rf_wen = 0;
     branch = 0;
     lhb_llb_con1 = 1;
+    mem2reg=0;
     jal = 0;
     s5 = 0;
     s6 = 1;
@@ -190,6 +194,7 @@ begin
     dmem_wen = 1;
     rf_wen = 0;
     branch = 0;
+    mem2reg=0;
     lhb_llb_con1 = 1;
     jal = 0;
     s5 = 0;
@@ -227,6 +232,7 @@ begin
     branch=1;
     jal=0;
     jr = 0;
+    mem2reg=0;
     /*if(flag[2] == 1'b1 && cond==4'b000)
     begin
       //Branch EQUAL previous instruction condition
